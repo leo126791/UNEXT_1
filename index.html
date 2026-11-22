@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>昇嶺電子｜產銷協同儀表板</title>
+<style>
+:root{
+  --bg:#F1F5F9;--card:#FFFFFF;--ink:#0F172A;--ink2:#334155;--mute:#64748B;--line:#E2E8F0;
+  --blue:#2563EB;--blue-l:#DBEAFE;--red:#DC2626;--red-l:#FEE2E2;--violet:#7C3AED;--violet-l:#EDE9FE;
+  --green:#059669;--green-l:#D1FAE5;--amber:#D97706;--amber-l:#FEF3C7;--gold:#F59E0B;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft JhengHei","PingFang TC","Noto Sans TC",sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:14px}
+
+/* ---------- Header ---------- */
+header{background:#0F172A;color:#fff;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,#3B82F6,#8B5CF6);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px}
+.brand h1{font-size:17px;font-weight:800;letter-spacing:.5px}
+.brand small{display:block;font-size:11px;color:#94A3B8;font-weight:500}
+.hdr-right{display:flex;align-items:center;gap:14px;font-size:13px}
+.hdr-right select{background:#1E293B;color:#fff;border:1px solid #334155;border-radius:7px;padding:6px 10px}
+.clock{color:#CBD5E1;font-variant-numeric:tabular-nums}
+.live{display:flex;align-items:center;gap:6px;color:#86EFAC;font-size:12px}
+.live i{width:8px;height:8px;border-radius:50%;background:#22C55E;box-shadow:0 0 0 3px rgba(34,197,94,.25);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 6px rgba(34,197,94,0)}}
+.btn-ghost{background:transparent;border:1px solid #334155;color:#CBD5E1;border-radius:7px;padding:6px 10px;font-size:12px}
+.btn-ghost:hover{background:#1E293B}
+
+/* ---------- Nav ---------- */
+nav{background:#fff;border-bottom:1px solid var(--line);padding:0 24px;display:flex;gap:4px;position:sticky;top:60px;z-index:40}
+nav button{background:none;border:none;padding:14px 16px;font-size:14px;font-weight:700;color:var(--mute);border-bottom:3px solid transparent;display:flex;align-items:center;gap:7px}
+nav button.on{color:var(--ink);border-bottom-color:var(--blue)}
+nav button:hover{color:var(--ink)}
+.badge{background:var(--red);color:#fff;font-size:11px;border-radius:99px;padding:0 7px;min-width:18px;line-height:18px;text-align:center}
+.badge.hide{display:none}
+
+main{padding:20px 24px 40px;max-width:1500px;margin:0 auto}
+section{display:none}
+section.on{display:block}
+
+/* ---------- Common ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.card h3{font-size:15px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card h3 .sub{font-size:12px;color:var(--mute);font-weight:500}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g-side{grid-template-columns:380px 1fr}
+.mt{margin-top:16px}
+.btn{border:none;border-radius:8px;padding:9px 14px;font-weight:700;font-size:13.5px;display:inline-flex;align-items:center;gap:6px;justify-content:center}
+.btn-p{background:var(--blue);color:#fff}.btn-p:hover{background:#1D4ED8}
+.btn-g{background:var(--green);color:#fff}.btn-g:hover{background:#047857}
+.btn-a{background:var(--amber);color:#fff}
+.btn-o{background:#fff;color:var(--ink2);border:1px solid var(--line)}.btn-o:hover{background:#F8FAFC}
+.btn-sm{padding:5px 10px;font-size:12.5px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:99px;white-space:nowrap}
+.t-blue{background:var(--blue-l);color:#1D4ED8}.t-red{background:var(--red-l);color:#B91C1C}.t-violet{background:var(--violet-l);color:#6D28D9}
+.t-green{background:var(--green-l);color:#047857}.t-amber{background:var(--amber-l);color:#B45309}.t-gray{background:#F1F5F9;color:#475569}
+.cust{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;color:#fff;font-weight:800;font-size:13px}
+.c-甲{background:var(--blue)}.c-乙{background:var(--red)}.c-丙{background:var(--violet)}
+label.f{display:block;font-size:12.5px;font-weight:700;color:var(--ink2);margin:10px 0 4px}
+.inp{width:100%;border:1px solid #CBD5E1;border-radius:8px;padding:8px 10px;background:#fff}
+.inp:focus{outline:2px solid #BFDBFE;border-color:var(--blue)}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.hint{font-size:12px;color:var(--mute)}
+.src{font-size:11px;color:var(--mute)}
+table.t{width:100%;border-collapse:collapse;font-size:13px}
+table.t th{text-align:left;font-size:12px;color:var(--mute);font-weight:700;padding:8px;border-bottom:1px solid var(--line);background:#F8FAFC}
+table.t td{padding:8px;border-bottom:1px solid #F1F5F9;vertical-align:middle}
+table.t tr.best td{background:#ECFDF5}
+.empty{color:var(--mute);text-align:center;padding:24px;font-size:13px}
+
+/* ---------- KPI ---------- */
+.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;position:relative;overflow:hidden}
+.kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--k,#2563EB)}
+.kpi .lbl{font-size:12.5px;color:var(--mute);font-weight:700}
+.kpi .val{font-size:28px;font-weight:900;margin:2px 0;font-variant-numeric:tabular-nums}
+.kpi .val small{font-size:14px;font-weight:700;color:var(--mute)}
+.kpi .cmp{font-size:12px;color:var(--ink2)}
+.kpi .cmp b{color:var(--green)}
+
+/* ---------- Gantt ---------- */
+.gantt{position:relative;padding-left:56px;padding-top:22px}
+.g-days{position:absolute;left:56px;right:0;top:0;height:100%;pointer-events:none}
+.g-day{position:absolute;top:0;bottom:0;border-left:1px dashed #CBD5E1;font-size:11px;color:var(--mute);padding-left:4px}
+.g-row{position:relative;height:38px;margin-bottom:6px;background:#F8FAFC;border-radius:6px}
+.g-lbl{position:absolute;left:-56px;top:0;width:50px;height:38px;display:flex;align-items:center;font-weight:800;font-size:13px;color:var(--ink2)}
+.g-bar{position:absolute;top:4px;height:30px;border-radius:5px;color:#fff;font-size:11.5px;font-weight:700;padding:0 6px;display:flex;align-items:center;overflow:hidden;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.g-bar.甲{background:#3B82F6}.g-bar.乙{background:#EF4444}.g-bar.丙{background:#8B5CF6}
+.g-bar.new{background:repeating-linear-gradient(45deg,#F59E0B,#F59E0B 8px,#FBBF24 8px,#FBBF24 16px);color:#451A03;outline:2px solid #B45309}
+.g-bar.late{outline:3px solid #7F1D1D;outline-offset:-1px}
+.g-bar.late::after{content:"逾期";position:absolute;right:3px;top:2px;background:#7F1D1D;color:#fff;font-size:10px;padding:0 4px;border-radius:3px}
+.g-co{position:absolute;top:4px;height:30px;background:repeating-linear-gradient(-45deg,#94A3B8,#94A3B8 3px,#CBD5E1 3px,#CBD5E1 6px);border-radius:3px}
+.g-legend{display:flex;gap:14px;font-size:12px;color:var(--mute);margin-top:6px;flex-wrap:wrap}
+.g-legend span{display:flex;align-items:center;gap:5px}
+.g-legend i{width:14px;height:10px;border-radius:2px;display:inline-block}
+
+/* ---------- Messages ---------- */
+.msg{border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:10px;background:#fff;border-left:5px solid var(--mute)}
+.msg.追加{border-left-color:var(--blue)}.msg.換零件{border-left-color:var(--amber)}
+.msg.unack{background:#FFFBEB;box-shadow:0 0 0 2px #FDE68A}
+.msg-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.msg-title{font-weight:800;font-size:15px}
+.msg-meta{font-size:12px;color:var(--mute);margin-top:4px}
+.msg-note{margin-top:6px;font-size:13px;color:var(--ink2);background:#F8FAFC;border-radius:7px;padding:6px 9px}
+.msg-impact{margin-top:6px;font-size:12.5px;background:var(--amber-l);color:#78350F;border-radius:7px;padding:6px 9px}
+.msg-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;flex-wrap:wrap}
+.status{font-size:12.5px;font-weight:700}
+.s-wait{color:var(--amber)}.s-ok{color:var(--green)}
+.decision{margin-top:6px;font-size:12.5px;background:var(--green-l);color:#065F46;border-radius:7px;padding:6px 9px}
+.filters{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:#fff;border-radius:99px;padding:4px 12px;font-size:12.5px;font-weight:700;color:var(--ink2)}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.seg{display:flex;border:1px solid #CBD5E1;border-radius:8px;overflow:hidden}
+.seg button{flex:1;border:none;background:#fff;padding:8px;font-weight:700;color:var(--ink2)}
+.seg button.on{background:var(--blue);color:#fff}
+.parse-box{background:#F8FAFC;border:1px dashed #CBD5E1;border-radius:9px;padding:10px;margin-bottom:6px}
+
+/* ---------- Fixtures ---------- */
+.fx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.fx{border:1px solid var(--line);border-radius:11px;padding:12px;background:#fff;display:flex;flex-direction:column;gap:6px}
+.fx.out{background:#FFF7ED;border-color:#FED7AA}
+.fx.over{background:#FEF2F2;border-color:#FCA5A5}
+.fx-name{font-weight:800}
+.fx-id{font-size:11.5px;color:var(--mute);font-family:Consolas,monospace}
+.fx-who{font-size:13px;color:var(--ink2)}
+.fx-foot{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:6px}
+
+/* ---------- Predict ---------- */
+.reco{border-radius:12px;padding:16px 18px;color:#fff;display:flex;gap:14px;align-items:flex-start}
+.reco.green{background:linear-gradient(135deg,#047857,#059669)}
+.reco.amber{background:linear-gradient(135deg,#B45309,#D97706)}
+.reco.red{background:linear-gradient(135deg,#991B1B,#DC2626)}
+.reco .ico{font-size:30px;line-height:1}
+.reco h4{font-size:17px;font-weight:900;margin-bottom:3px}
+.reco p{font-size:13.5px;opacity:.95}
+.cmp-card{border:1px solid var(--line);border-radius:11px;padding:12px 14px;background:#fff}
+.cmp-card.win{border:2px solid var(--green);background:#F0FDF4}
+.cmp-card .h{font-size:12.5px;font-weight:800;color:var(--mute)}
+.cmp-card .m{font-size:22px;font-weight:900;margin:2px 0}
+.cmp-card .d{font-size:12px;color:var(--ink2)}
+.warn{border-radius:9px;padding:9px 12px;font-size:13px;margin-top:8px}
+.warn.w-a{background:var(--amber-l);color:#78350F}
+.warn.w-r{background:var(--red-l);color:#7F1D1D}
+.warn.w-g{background:var(--green-l);color:#065F46}
+.param{font-size:12px;color:var(--ink2);border-top:1px dashed var(--line);margin-top:12px;padding-top:10px}
+.param div{display:flex;justify-content:space-between;gap:8px;padding:2px 0}
+.param div span:last-child{color:var(--mute);text-align:right}
+
+/* ---------- Modal & Toast ---------- */
+.mask{position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;align-items:center;justify-content:center;z-index:100}
+.mask.on{display:flex}
+.modal{background:#fff;border-radius:14px;padding:20px;width:400px;max-width:92vw}
+.modal h4{font-size:16px;font-weight:800;margin-bottom:6px}
+#toasts{position:fixed;right:20px;bottom:20px;display:flex;flex-direction:column;gap:10px;z-index:200}
+.toast{background:#0F172A;color:#fff;border-radius:11px;padding:12px 16px;width:340px;box-shadow:0 10px 30px rgba(0,0,0,.25);border-left:5px solid var(--gold);animation:slide .3s ease}
+.toast b{display:block;font-size:14px;margin-bottom:2px}
+.toast span{font-size:12.5px;color:#CBD5E1}
+@keyframes slide{from{transform:translateX(30px);opacity:0}}
+
+@media (max-width:1100px){.g4{grid-template-columns:1fr 1fr}.g-side,.g2,.g3{grid-template-columns:1fr}}
+
+/* ---------- Daily ---------- */
+.chart svg{width:100%;height:auto;display:block}
+.chart text{font-family:inherit}
+.tagbar{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px}
+.tagbar .nm{width:92px;font-weight:700;color:var(--ink2)}
+.tagbar .tr{flex:1;background:#F1F5F9;border-radius:5px;height:18px;overflow:hidden}
+.tagbar .fl{height:100%;border-radius:5px}
+.tagbar .ct{width:52px;text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+.qchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.qchips button{border:1px dashed #94A3B8;background:#fff;border-radius:99px;padding:2px 9px;font-size:12px;color:var(--ink2)}
+.qchips button:hover{background:#F1F5F9}
+.stop-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #F1F5F9;font-size:13px}
+.stop-item .h{font-weight:800;width:54px;text-align:right;font-variant-numeric:tabular-nums}
+.dt td{font-size:12.5px}
+.dt tr.low td{background:#FEF2F2}
+.dt tr.today td{background:#EFF6FF}
+.oee{font-weight:800}
+.note-cell{max-width:300px}
+.ntag{display:inline-block;font-size:11px;font-weight:700;padding:0 6px;border-radius:4px;margin:1px 2px 1px 0;color:#fff}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo">昇</div>
+    <div><h1>昇嶺電子｜產銷協同儀表板</h1><small>變更即時通知 · 夾具借還追蹤 · 插單違約預測</small></div>
+  </div>
+  <div class="hdr-right">
+    <span class="live"><i></i>即時同步</span>
+    <span class="clock" id="clock"></span>
+    <label>目前身分
+      <select id="role">
+        <option value="sales">業務｜林佳慧</option>
+        <option value="lead">現場課長｜王課長</option>
+        <option value="boss">老闆｜陳董</option>
+      </select>
+    </label>
+    <button class="btn-ghost" id="resetBtn" title="清除瀏覽器資料並重新載入示範資料">重置示範資料</button>
+  </div>
+</header>
+
+<nav id="nav">
+  <button data-tab="overview" class="on">📊 總覽</button>
+  <button data-tab="messages">📨 變更通知 <span class="badge hide" id="bMsg">0</span></button>
+  <button data-tab="fixtures">🧰 夾具管理 <span class="badge hide" id="bFx">0</span></button>
+  <button data-tab="predict">⚖️ 違約預測 <span class="badge hide" id="bPred">0</span></button>
+  <button data-tab="daily">📒 每日紀錄 <span class="badge hide" id="bDaily">0</span></button>
+</nav>
+
+<main>
+  <!-- ================= 總覽 ================= -->
+  <section id="overview" class="on">
+    <div class="grid g4" id="kpis"></div>
+    <div class="card mt">
+      <h3>SMT 4 條線排程（目前）<span class="sub">每格 = 1 個工作天（每線 10 小時）｜斜紋灰 = 換線時間</span></h3>
+      <div id="ovGantt"></div>
+    </div>
+    <div class="grid mt" style="grid-template-columns:1.6fr 1fr">
+      <div class="card"><h3>SMT 每日停機與稼動率 <span class="sub">九月（資料3 機台紀錄）＋今日 <button class="btn btn-o btn-sm" data-goto="daily">每日紀錄</button></span></h3><div class="chart" id="ovChart"></div></div>
+      <div class="card"><h3>今日現場動態 <span class="sub" id="ovTodaySub"></span></h3><div id="ovToday"></div></div>
+    </div>
+    <div class="grid g2 mt">
+      <div class="card"><h3>最新變更通知 <button class="btn btn-o btn-sm" data-goto="messages">查看全部</button></h3><div id="ovMsgs"></div></div>
+      <div class="card"><h3>夾具提醒 <button class="btn btn-o btn-sm" data-goto="fixtures">夾具管理</button></h3><div id="ovFx"></div></div>
+    </div>
+  </section>
+
+  <!-- ================= 變更通知 ================= -->
+  <section id="messages">
+    <div class="grid g-side">
+      <div class="card" id="postCard">
+        <h3>業務｜登錄客戶變更 <span class="sub">送出後課長立即收到</span></h3>
+        <div class="parse-box">
+          <label class="f" style="margin-top:0">① 貼上客戶原文（LINE／Email／電話筆記），自動帶入欄位</label>
+          <textarea class="inp" id="rawText" rows="3" placeholder="例：甲那邊剛 LINE 說 A1 要追加 800 片，後天要出貨"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+            <span class="src">規則辨識（正式版可換成 LLM API）</span>
+            <button class="btn btn-o btn-sm" id="parseBtn">✨ 自動辨識</button>
+          </div>
+        </div>
+        <label class="f">② 變更類型</label>
+        <div class="seg" id="typeSeg"><button data-v="追加" class="on">追加訂單</button><button data-v="換零件">換零件</button></div>
+        <div class="row">
+          <div><label class="f">客戶</label><select class="inp" id="fCust"><option>甲</option><option>乙</option><option>丙</option></select></div>
+          <div><label class="f">機種</label><select class="inp" id="fModel"></select></div>
+        </div>
+        <div class="row" id="qtyRow">
+          <div><label class="f">追加數量（片）</label><input class="inp" id="fQty" type="number" min="1" value="500"></div>
+          <div><label class="f">客戶要的交期</label><select class="inp" id="fDue"></select></div>
+        </div>
+        <div id="partRow" style="display:none">
+          <label class="f">換料內容（舊料 → 新料）</label>
+          <input class="inp" id="fPart" placeholder="例：C55 電容 10µF → 22µF">
+        </div>
+        <div class="row">
+          <div><label class="f">客戶原本從哪裡通知</label><select class="inp" id="fChannel"><option>LINE</option><option>電話</option><option>口頭（老闆轉達）</option><option>正式單</option><option>Email</option></select></div>
+        </div>
+        <label class="f">備註</label>
+        <input class="inp" id="fNote" placeholder="選填">
+        <button class="btn btn-p mt" style="width:100%" id="postBtn">📤 送出，通知現場課長</button>
+        <p class="hint" style="margin-top:8px">作業員不需要輸入任何資料；由業務一次登錄，課長按一下「確認收到」即可。</p>
+      </div>
+      <div class="card">
+        <h3>變更訊息流 <span class="sub" id="msgStat"></span></h3>
+        <div class="filters" id="msgFilter">
+          <button class="chip on" data-f="all">全部</button>
+          <button class="chip" data-f="wait">待課長確認</button>
+          <button class="chip" data-f="eval">待老闆決策</button>
+          <button class="chip" data-f="追加">追加</button>
+          <button class="chip" data-f="換零件">換零件</button>
+        </div>
+        <div id="msgList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 夾具管理 ================= -->
+  <section id="fixtures">
+    <div class="grid g4" id="fxKpis"></div>
+    <div class="card mt">
+      <h3>夾具／治具／飛達一覽 <span class="sub">按一下就能借出或歸還，不必填表</span></h3>
+      <div class="filters" id="fxFilter">
+        <button class="chip on" data-f="all">全部</button>
+        <button class="chip" data-f="in">在庫</button>
+        <button class="chip" data-f="out">借出中</button>
+        <button class="chip" data-f="over">逾期未還</button>
+      </div>
+      <div class="fx-grid" id="fxGrid"></div>
+    </div>
+    <div class="card mt">
+      <h3>借還紀錄 <span class="sub">最新 15 筆</span></h3>
+      <table class="t"><thead><tr><th>時間</th><th>動作</th><th>夾具</th><th>人員</th><th>使用地點</th></tr></thead><tbody id="fxLog"></tbody></table>
+    </div>
+  </section>
+
+  <!-- ================= 違約預測 ================= -->
+  <section id="predict">
+    <div class="grid g-side">
+      <div class="card">
+        <h3>插單情境輸入</h3>
+        <label class="f" style="margin-top:0">從待決策的變更帶入</label>
+        <select class="inp" id="pFrom"></select>
+        <div class="row">
+          <div><label class="f">客戶</label><select class="inp" id="pCust"><option>甲</option><option>乙</option><option>丙</option></select></div>
+          <div><label class="f">機種</label><select class="inp" id="pModel"></select></div>
+        </div>
+        <div class="row">
+          <div><label class="f">數量（片）</label><input class="inp" id="pQty" type="number" min="1" value="800"></div>
+          <div><label class="f">客戶要的交期</label><select class="inp" id="pDue"></select></div>
+        </div>
+        <button class="btn btn-p mt" style="width:100%" id="runPred">⚖️ 預測違約風險</button>
+        <div class="param">
+          <b style="display:block;margin-bottom:4px">模型參數與來源</b>
+          <div><span>SMT 速度 24 秒／片（150 片／小時）</span><span>資料2【資料顯示的】</span></div>
+          <div><span>實際換線 54 分鐘／次（排程原估 30 分）</span><span>資料1、3【資料顯示的】</span></div>
+          <div><span>罰則：乙 2%／天、丙 1%／天、甲 無</span><span>個案單【題目說的】</span></div>
+          <div><span>售價 1,200 元／片</span><span>個案單【題目說的】</span></div>
+          <div><span>週六加班 ≈ 31 元／片</span><span>資料3 週六 1,040h÷9,000 片×268 元</span></div>
+          <div><span>每線每天可用 10 小時</span><span>【我猜的】平日開機≈41h÷4 線</span></div>
+          <div><span>目前工單、共用料庫存</span><span>【擬真數據】</span></div>
+        </div>
+      </div>
+      <div id="predOut"><div class="card empty">輸入插單條件後按「預測違約風險」，系統會試算 4 條線所有插入位置，找出違約金最低的排法。</div></div>
+    </div>
+  </section>
+
+  <!-- ================= 每日紀錄 ================= -->
+  <section id="daily">
+    <div class="grid g4" id="dKpis"></div>
+    <div class="grid g-side mt">
+      <div>
+        <div class="card">
+          <h3>課長日報（今日） <span class="sub" id="repSub"></span></h3>
+          <div class="row">
+            <div><label class="f" style="margin-top:0">出貨（片）</label><input class="inp" id="rShip" type="number" min="0" placeholder="例 4800"></div>
+            <div><label class="f" style="margin-top:0">加班（小時）</label><input class="inp" id="rOt" type="number" min="0" placeholder="例 120"></div>
+          </div>
+          <div class="row">
+            <div><label class="f">SMT 換線（次）</label><input class="inp" id="rCo" type="number" min="0" placeholder="例 6"></div>
+            <div><label class="f">重測（片）</label><input class="inp" id="rRetest" type="number" min="0" placeholder="例 300"></div>
+          </div>
+          <label class="f">課長備註</label>
+          <textarea class="inp" id="rNote" rows="3" placeholder="點下方常用語快速帶入，也可以自己寫"></textarea>
+          <div class="qchips" id="noteChips">
+            <button>甲的先做</button><button>等料停線</button><button>夾具不夠</button><button>夾具被借走</button><button>換線等飛達</button><button>換線後首件不良</button><button>拋料停機</button><button>測試機台異常</button><button>舊料已貼需拆</button><button>加班趕單</button><button>正常</button>
+          </div>
+          <button class="btn btn-p mt" style="width:100%" id="repBtn">📒 送出今日日報</button>
+          <p class="hint" style="margin-top:6px">作業員不用填。出貨／換線等數字正式版可由 MES 與機台自動帶入，課長只寫備註。</p>
+        </div>
+        <div class="card mt">
+          <h3>SMT 機台停機紀錄（今日） <span class="sub" id="stopSub"></span></h3>
+          <div class="row">
+            <div><label class="f" style="margin-top:0">產線</label><select class="inp" id="sLine"><option value="L1">1 線</option><option value="L2">2 線</option><option value="L3">3 線</option><option value="L4">4 線</option></select></div>
+            <div><label class="f" style="margin-top:0">停機類型</label><select class="inp" id="sType"><option>換線</option><option>等料</option><option>拋料與故障</option></select></div>
+            <div><label class="f" style="margin-top:0">時數</label><input class="inp" id="sH" type="number" min="0.1" step="0.1" value="0.5"></div>
+          </div>
+          <label class="f">原因</label>
+          <input class="inp" id="sReason" placeholder="例：C2 的 BT-5 模組未到">
+          <button class="btn btn-o mt" style="width:100%" id="stopBtn">＋ 新增停機紀錄</button>
+          <p class="hint" style="margin-top:6px">正式版由 SMT 機台紀錄自動匯入，這裡用來模擬匯入或補登。</p>
+          <div id="stopList" style="margin-top:8px"></div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h3>九月 SMT 每日停機與稼動率 <span class="sub">柱 = 停機時數（左軸）｜線 = 稼動率（右軸）｜來源：資料3 SMT開機與停機【資料顯示的】</span></h3>
+          <div class="chart" id="dChart"></div>
+        </div>
+        <div class="grid g2 mt">
+          <div class="card"><h3>課長備註自動分類 <span class="sub">九月 26 個工作天</span></h3><div id="tagBars"></div><p class="src" style="margin-top:6px">關鍵字規則分類（正式版可換成 LLM 判讀）；一則備註可同時屬於多類</p></div>
+          <div class="card"><h3>九月停機結構 <span class="sub">共 243 小時</span></h3><div id="stopBars"></div><p class="src" style="margin-top:6px">來源：資料1 現場概況、資料3【資料顯示的】</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="card mt">
+      <h3>每日紀錄總表 <span class="sub">課長日報＋SMT 機台紀錄＋當日變更，合併成一張表；紅底 = 稼動率低於 75%</span></h3>
+      <div class="filters" id="dFilter"></div>
+      <div style="overflow-x:auto"><table class="t dt"><thead><tr><th>日期</th><th>出貨</th><th>加班</th><th>換線</th><th>重測</th><th>SMT 稼動率</th><th>停機 換線／等料／拋料</th><th>課長備註（原文）</th><th>自動分類</th><th>當日變更（追加／換零件）</th></tr></thead><tbody id="dTable"></tbody></table></div>
+    </div>
+  </section>
+</main>
+
+<div class="mask" id="mask"><div class="modal" id="modal"></div></div>
+<div id="toasts"></div>
+
+<script>
+/* =====================================================================
+   參數（來源見違約預測頁左下）
+===================================================================== */
+const KEY = 'shengling_dashboard_v1';
+const LINES = ['L1','L2','L3','L4'];
+const LINE_NAME = {L1:'1 線',L2:'2 線',L3:'3 線',L4:'4 線'};
+const MODELS = ['A1','A2','B1','B2','C1','C2'];
+const RATE = 150;          // 片/小時（24 秒/片）
+const CO_H = 0.9;          // 實際換線 ≈ 54 分
+const DAY_H = 10;          // 每線每天工時【我猜的】
+const PRICE = 1200;
+const PENALTY = {甲:0, 乙:0.02, 丙:0.01};
+const OT_PER_PC = 31;      // 週六加班成本 元/片
+const SEPT_BASE_MIN = 296; // 九月 10 筆有紀錄的變更，平均 296 分鐘才到現場（資料3）
+const SHARED = {
+  'BT-5 藍牙模組': {models:['A1','C2'], stock:7000},
+  'U12 音訊 IC':   {models:['A2','B2'], stock:9000},
+  'MCU-C 控制晶片':{models:['C1','C2'], stock:6000},
+};
+const PEOPLE = ['1線 黃課長','2線 王課長','3線 陳組長','4線 李課長','測試站 周技術員','工程部 吳工程師'];
+const ROLE_NAME = {sales:'業務 林佳慧', lead:'2線 王課長', boss:'老闆 陳董'};
+
+/* =====================================================================
+   資料3_九月每日紀錄.xlsx 原始資料【資料顯示的】（週日休，未列）
+   d:日 w:星期 ship:出貨 ot:加班 co:換線 rt:重測 note:課長備註原文 ev:當日變更
+   on:SMT開機 run:正常運轉 oee:稼動率 coH/matH/errH:換線/等料/拋料與故障停機
+===================================================================== */
+const SEPT = [
+  [1,'二',5000,105,5,280,'正常',null, 39.8,33.3,.84,4,1,1.5],
+  [2,'三',4850,120,7,340,'甲的先做',['追加 400 片（A1）','甲','LINE','09:20','11:40','乙的 W0903 晚 1 天出貨'], 41.8,32.3,.77,6,2,1.5],
+  [3,'四',4750,125,7,340,'2 線一天換線 4 次',null, 41.7,31.7,.76,6,2,2],
+  [4,'五',5050,110,7,340,'舊料退庫',['換零件（C2）','丙','正式單','14:00','14:30',''], 43.2,33.7,.78,6,2,1.5],
+  [5,'六',2325,245,2,160,'加班趕乙的',null, 19,15.5,.82,2,.5,1],
+  [7,'一',5000,105,5,280,'',null, 40.8,33.3,.82,4.5,1,2],
+  [8,'二',4750,125,7,340,'老闆說先做',['追加 300 片（A2）','甲','口頭','沒記錄','10:15','丙的 W0906 晚 2 天'], 41.7,31.7,.76,6,2.5,1.5],
+  [9,'三',4900,115,5,280,'夾具不夠',null, 40.2,32.7,.81,4.5,1,2],
+  [10,'四',4450,130,6,310,'等料',['追加 200 片（C1）','丙','LINE','16:05','隔天 08:00',''], 40.7,29.7,.73,5.5,4,1.5],
+  [11,'五',4200,135,5,280,'C1 等料，停線 3 小時',null, 40.5,28,.69,4.5,6,2],
+  [12,'六',2225,255,2,160,'加班補 C1',null, 18.8,14.8,.79,2,1,1],
+  [14,'一',4650,120,8,370,'舊料已貼 120 片',['換零件（C2）','丙','LINE','10:30','15:00','120 片拆掉重做'], 43,31,.72,7,3,2],
+  [15,'二',4900,115,5,280,'換線後首件不良，重測',null, 41.2,32.7,.79,4.5,1.5,2.5],
+  [16,'三',4700,125,7,340,'夾具借走了',['追加 500 片（A1）','甲','電話','13:10','15:50','乙的 W0914 晚 1 天'], 41.8,31.3,.75,6,2.5,2],
+  [17,'四',4100,135,9,640,'客戶甲的先做。SMT 3 線：等料，丙的 W0915（C2）停 4 小時。測試：機台怪怪的，重測',['追加 800 片（A1）','甲','LINE','09:10','10:20',''], 47.3,27.3,.58,8.5,9,2.5],
+  [18,'五',4850,120,6,310,'（隔天補寫）1 線拋料停機',null, 45.3,32.3,.71,5.5,1.5,6],
+  [19,'六',2175,265,3,190,'加班',null, 19,14.5,.76,2.5,1,1],
+  [21,'一',4800,115,8,370,'換線',['換零件（C2）','丙','正式單','11:00','11:20','換線 1.5 小時'], 43.5,32,.74,7,3,1.5],
+  [22,'二',5050,110,5,280,'照排',['追加 300 片（B2）','乙','正式單','09:00','09:30','準時'], 40.2,33.7,.84,4,1,1.5],
+  [23,'三',4900,120,5,290,'乙退回 10 片重測',null, 40.7,32.7,.80,4.5,1.5,2],
+  [24,'四',4650,130,8,370,'SMT 排滿，乙的往後',['追加 600 片（A2）','甲','口頭','沒記錄','13:40','乙的 W0920 晚 2 天'], 43.5,31,.71,7,3.5,2],
+  [25,'五',4950,125,5,280,'',null, 41,33,.80,4.5,1.5,2],
+  [26,'六',2275,275,2,160,'加班趕乙的',null, 18.7,15.2,.81,2,.5,1],
+  [28,'一',4800,120,7,340,'',['換零件（C1）','丙','LINE','15:30','隔天 08:30',''], 43,32,.74,6.5,3,1.5],
+  [29,'二',4750,125,5,280,'舊料 200 片拆掉',null, 41.2,31.7,.77,4.5,3,2],
+  [30,'三',4950,130,7,340,'換線等飛達',['追加 400 片（A1）','甲','LINE','10:00','14:20',''], 45.5,33,.73,8,3.5,1],
+].map(r => ({label:`9/${r[0]}`, w:r[1], ship:r[2], ot:r[3], co:r[4], rt:r[5], note:r[6], ev:r[7], on:r[8], run:r[9], oee:r[10], coH:r[11], matH:r[12], errH:r[13], src:'sept'}));
+const SEPT_TOTAL = {on:1003, run:760, coH:133, matH:62, errH:48}; // 機台紀錄月總數（資料3 合計列）
+const NOTE_TAGS = [
+  {k:'插單打亂', c:'#2563EB', re:/先做|追加|插單|排滿|往後/},
+  {k:'等料缺料', c:'#D97706', re:/等料|缺料|料未到|未到/},
+  {k:'換料重工', c:'#B45309', re:/舊料|拆掉|拆|退庫/},
+  {k:'夾具治具', c:'#7C3AED', re:/夾具|治具|飛達/},
+  {k:'換線', c:'#DB2777', re:/換線/},
+  {k:'品質重測', c:'#DC2626', re:/重測|不良|退回/},
+  {k:'機台異常', c:'#475569', re:/拋料|故障|機台/},
+  {k:'加班趕工', c:'#0F766E', re:/加班|趕/},
+];
+function noteTags(n){ if (!n || !n.trim()) return [{k:'未填寫', c:'#94A3B8'}]; const t = NOTE_TAGS.filter(x => x.re.test(n)); if (/補寫/.test(n)) t.push({k:'補寫', c:'#94A3B8'}); return t.length ? t : [{k:'正常', c:'#059669'}]; }
+const todayKey = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+const STOP_COLOR = {'換線':'#F43F5E','等料':'#F59E0B','拋料與故障':'#64748B'};
+
+/* =====================================================================
+   工具函式
+===================================================================== */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const fmt = n => Math.round(n).toLocaleString('zh-TW');
+const money = n => 'NT$ ' + fmt(n);
+const ago = m => new Date(Date.now() - m * 60000).toISOString();
+const diffMin = (a, b) => Math.round((new Date(b) - new Date(a)) / 60000);
+const pad = n => String(n).padStart(2, '0');
+function hm(iso){ const d = new Date(iso); return `${d.getMonth()+1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+function sinceText(iso){ const m = diffMin(iso, new Date()); if (m < 1) return '剛剛'; if (m < 60) return m + ' 分鐘前'; if (m < 1440) return Math.floor(m/60) + ' 小時前'; return Math.floor(m/1440) + ' 天前'; }
+const WEEK = '日一二三四五六';
+function wdDate(i){ // 第 i 個工作天（週日休）
+  const d = new Date(); d.setHours(0,0,0,0);
+  if (d.getDay() === 0) d.setDate(d.getDate() + 1);
+  let c = 0;
+  while (c < i){ d.setDate(d.getDate() + 1); if (d.getDay() !== 0) c++; }
+  return d;
+}
+function dayLabel(i){ const d = wdDate(i); const t0 = new Date(); t0.setHours(0,0,0,0); const gap = Math.round((d - t0) / 86400000); const pre = ['今天','明天','後天'][gap] || ''; return `${pre?pre+' ':''}${d.getMonth()+1}/${d.getDate()}(${WEEK[d.getDay()]})`; }
+function esc(s){ return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+const custTag = c => `<span class="cust c-${c}">${c}</span>`;
+
+/* =====================================================================
+   示範資料【擬真數據】
+===================================================================== */
+function seed(){
+  const o = (id,customer,model,qty,due) => ({id,customer,model,qty,due});
+  return {
+    seq: 1,
+    messages: [
+      {id:'M-003',type:'追加',customer:'乙',model:'B2',qty:300,due:2,channel:'正式單',part:'',note:'乙正式 PO 已到',by:'業務 林佳慧',createdAt:ago(60*20),ackBy:'2線 王課長',ackAt:ago(60*20-9),decision:{text:'核准：排入 2 線，預估違約金 NT$ 0',by:'老闆 陳董',at:ago(60*19)}},
+      {id:'M-004',type:'換零件',customer:'丙',model:'C2',qty:0,due:1,channel:'LINE',part:'C55 電容 10µF → 22µF',note:'丙設計變更 Rev.D，舊料先停用',by:'業務 張志明',createdAt:ago(130),ackBy:'3線 陳組長',ackAt:ago(124),decision:null},
+      {id:'M-005',type:'追加',customer:'甲',model:'A1',qty:800,due:2,channel:'LINE',part:'',note:'甲採購 LINE：A1 追加 800 片，後天要',by:'業務 林佳慧',createdAt:ago(12),ackBy:null,ackAt:null,decision:null},
+    ],
+    fixtures: [
+      {id:'JG-A1-01',name:'A1 插件夾具 #1',kind:'插件夾具',model:'A1',home:'治具室 A-1'},
+      {id:'JG-A1-02',name:'A1 插件夾具 #2',kind:'插件夾具',model:'A1',home:'治具室 A-1',borrower:'1線 黃課長',place:'1線插件站',borrowedAt:ago(300),dueAt:ago(-180)},
+      {id:'JG-A2-01',name:'A2 插件夾具 #1',kind:'插件夾具',model:'A2',home:'治具室 A-2'},
+      {id:'JG-B1-01',name:'B1 插件夾具 #1',kind:'插件夾具',model:'B1',home:'治具室 B-1',borrower:'4線 李課長',place:'4線插件站',borrowedAt:ago(60*26),dueAt:ago(120)},
+      {id:'JG-B2-01',name:'B2 插件夾具 #1',kind:'插件夾具',model:'B2',home:'治具室 B-2'},
+      {id:'JG-C1-01',name:'C1 插件夾具 #1',kind:'插件夾具',model:'C1',home:'治具室 C-1'},
+      {id:'JG-C2-01',name:'C2 插件夾具 #1',kind:'插件夾具',model:'C2',home:'治具室 C-2',borrower:'3線 陳組長',place:'3線插件站',borrowedAt:ago(200),dueAt:ago(-240)},
+      {id:'TS-A1-01',name:'A1 測試治具',kind:'測試治具',model:'A1',home:'測試區',borrower:'測試站 周技術員',place:'測試站 2 號機',borrowedAt:ago(60*30),dueAt:ago(60*6)},
+      {id:'FD-08-01',name:'8mm 飛達 ×20 組',kind:'飛達',model:'通用',home:'SMT 料架',borrower:'2線 王課長',place:'2線 SMT',borrowedAt:ago(90),dueAt:ago(-300)},
+      {id:'FD-12-01',name:'12mm 飛達 ×10 組',kind:'飛達',model:'通用',home:'SMT 料架'},
+    ],
+    log: [
+      {at:ago(90),act:'借出',fx:'FD-08-01',who:'2線 王課長',place:'2線 SMT'},
+      {at:ago(200),act:'借出',fx:'JG-C2-01',who:'3線 陳組長',place:'3線插件站'},
+      {at:ago(260),act:'歸還',fx:'JG-A2-01',who:'1線 黃課長',place:'治具室 A-2'},
+      {at:ago(300),act:'借出',fx:'JG-A1-02',who:'1線 黃課長',place:'1線插件站'},
+      {at:ago(60*26),act:'借出',fx:'JG-B1-01',who:'4線 李課長',place:'4線插件站'},
+      {at:ago(60*30),act:'借出',fx:'TS-A1-01',who:'測試站 周技術員',place:'測試站 2 號機'},
+    ],
+    schedule: {
+      L1: [o('W1101','甲','A1',900,0), o('W1102','乙','B1',1500,1), o('W1103','甲','A2',1200,2), o('W1104','丙','C1',900,3)],
+      L2: [o('W1105','乙','B2',1000,0), o('W1106','丙','C2',1200,1), o('W1107','乙','B1',1300,2), o('W1108','甲','A2',1000,4)],
+      L3: [o('W1109','丙','C2',1200,0), o('W1110','甲','A1',1500,2), o('W1111','乙','B2',1200,2), o('W1112','丙','C1',1000,3)],
+      L4: [o('W1113','乙','B1',1000,0), o('W1114','甲','A1',1200,2), o('W1115','丙','C1',900,3), o('W1116','乙','B2',1000,4)],
+    },
+    ...seedDaily(),
+  };
+}
+function seedDaily(){
+  const t = todayKey();
+  return {
+    reports: [],
+    stops: [
+      {date:t, line:'L2', type:'換線', h:0.9, reason:'W1105→W1106（B2→C2）換鋼板、換料', at:ago(150), by:'機台匯入'},
+      {date:t, line:'L1', type:'拋料與故障', h:0.5, reason:'高速機 0402 電阻吸嘴拋料', at:ago(95), by:'機台匯入'},
+      {date:t, line:'L3', type:'等料', h:1.0, reason:'C2 的 BT-5 藍牙模組未到料', at:ago(40), by:'機台匯入'},
+    ],
+  };
+}
+
+/* =====================================================================
+   狀態與跨分頁即時同步
+===================================================================== */
+let state = load();
+let ui = { tab:'overview', role:'sales', msgFilter:'all', fxFilter:'all', type:'追加', pred:null, evalMsg:null };
+const bc = ('BroadcastChannel' in window) ? new BroadcastChannel('shengling') : null;
+
+function load(){ try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.schedule){ if (!s.stops) Object.assign(s, seedDaily()); return s; } } catch(e){} const s = seed(); localStorage.setItem(KEY, JSON.stringify(s)); return s; }
+function save(evt){ localStorage.setItem(KEY, JSON.stringify(state)); if (bc && evt) bc.postMessage({...evt, state}); renderAll(); }
+function onRemote(evt){
+  state = (evt && evt.state) ? evt.state : load(); renderAll();
+  if (!evt) return;
+  if (evt.kind === 'new' && ui.role !== 'sales') toast(`📨 新的${evt.type}通知`, `${evt.customer} 客戶｜${evt.model}${evt.qty?'｜'+evt.qty+' 片':''}（${evt.by}）`);
+  if (evt.kind === 'ack' && ui.role === 'sales') toast('✅ 現場已確認', `${evt.who} 已確認 ${evt.id}`);
+  if (evt.kind === 'decision') toast('⚖️ 老闆已決策', evt.text);
+  if (evt.kind === 'report' && ui.role !== 'lead') toast('📒 課長日報已更新', evt.text);
+  if (evt.kind === 'stop' && ui.role !== 'lead') toast('🛑 SMT 停機紀錄', evt.text);
+}
+if (bc) bc.onmessage = e => onRemote(e.data);
+window.addEventListener('storage', e => { if (e.key === KEY && !bc) onRemote(null); });
+
+function toast(title, body){
+  const t = document.createElement('div'); t.className = 'toast';
+  t.innerHTML = `<b>${esc(title)}</b><span>${esc(body)}</span>`;
+  $('#toasts').appendChild(t); setTimeout(() => t.remove(), 6000);
+}
+
+/* =====================================================================
+   排程模擬與違約預測
+===================================================================== */
+function simulate(queue){
+  let t = 0, prev = null;
+  return queue.map(o => {
+    const co = (prev && prev.model !== o.model) ? CO_H : 0;
+    t += co; const start = t; t += o.qty / RATE; const end = t;
+    const deadline = (o.due + 1) * DAY_H;
+    const lateH = Math.max(0, end - deadline);
+    const days = lateH > 1e-9 ? Math.ceil(lateH / DAY_H - 1e-9) : 0;
+    const pen = days * o.qty * PRICE * (PENALTY[o.customer] || 0);
+    prev = o;
+    return {...o, co, coStart: start - co, start, end, days, pen};
+  });
+}
+const simAll = sched => Object.fromEntries(LINES.map(l => [l, simulate(sched[l])]));
+
+function materialCheck(sims, model){
+  const out = [];
+  for (const [part, info] of Object.entries(SHARED)){
+    if (!info.models.includes(model)) continue;
+    const list = [];
+    LINES.forEach(l => sims[l].forEach(o => { if (info.models.includes(o.model)) list.push({...o, line:l}); }));
+    list.sort((a,b) => a.start - b.start);
+    let cum = 0;
+    list.forEach(o => { cum += o.qty; if (cum > info.stock) out.push({part, o, short: Math.min(o.qty, cum - info.stock), stock: info.stock}); });
+  }
+  return out;
+}
+
+function evaluate(req){
+  const ins = {id:'插單', customer:req.customer, model:req.model, qty:req.qty, due:req.due, isNew:true};
+  const base = simAll(state.schedule);
+  const opts = [];
+  LINES.forEach(l => {
+    const q = state.schedule[l];
+    const basePen = base[l].reduce((a,b) => a + b.pen, 0);
+    const baseCo = base[l].filter(x => x.co > 0).length;
+    for (let p = (q.length ? 1 : 0); p <= q.length; p++){
+      const sim = simulate([...q.slice(0,p), ins, ...q.slice(p)]);
+      const me = sim.find(x => x.isNew);
+      const others = sim.filter(x => !x.isNew);
+      const pen = others.reduce((a,b) => a + b.pen, 0) - basePen;
+      const coAdd = sim.filter(x => x.co > 0).length - baseCo;
+      const late = others.filter(x => x.days > (base[l].find(b => b.id === x.id)?.days || 0));
+      const prev = sim[sim.indexOf(me) - 1];
+      opts.push({line:l, pos:p, sim, me, pen, coAdd, late, prev, meets: me.days === 0, finishDay: Math.floor((me.end - 1e-9) / DAY_H)});
+    }
+  });
+  opts.forEach(o => o.score = o.pen + (o.meets ? 0 : 1e8) + o.coAdd * 2000 + o.me.end * 10);
+  opts.sort((a,b) => a.score - b.score);
+  const best = opts[0];
+  // 傳統做法：「甲的先做」→ 插到最快空出的那條線、第 1 順位
+  const firstFree = LINES.filter(l => state.schedule[l].length).sort((a,b) => base[a][0].end - base[b][0].end)[0] || 'L1';
+  const legacy = opts.find(o => o.line === firstFree && o.pos === (state.schedule[firstFree].length ? 1 : 0));
+  const perLine = LINES.map(l => opts.find(o => o.line === l)).filter(Boolean);
+  const ot = req.qty * OT_PER_PC;
+  const simsBest = {...base, [best.line]: best.sim};
+  const material = materialCheck(simsBest, req.model);
+  const fxModel = state.fixtures.filter(f => f.model === req.model && f.kind === '插件夾具');
+  return {req, best, legacy, perLine, ot, base, simsBest, material, fxModel};
+}
+
+/* =====================================================================
+   Render：共用
+===================================================================== */
+function renderAll(){
+  renderBadges(); renderOverview(); renderMessages(); renderFixtures(); renderPredForm(); renderDaily();
+  if (ui.pred) renderPrediction(ui.pred);
+}
+function needsDecision(m){ return m.type === '追加' && !m.decision; }
+function isOver(f){ return f.borrower && new Date(f.dueAt) < new Date(); }
+
+function renderBadges(){
+  const wait = state.messages.filter(m => !m.ackAt).length;
+  const ev = state.messages.filter(needsDecision).length;
+  const ov = state.fixtures.filter(isOver).length;
+  [['#bMsg',wait],['#bPred',ev],['#bFx',ov]].forEach(([s,n]) => { $(s).textContent = n; $(s).classList.toggle('hide', !n); });
+}
+
+function ganttHTML(sims, opts = {}){
+  const maxEnd = Math.max(50, ...LINES.map(l => (sims[l].at(-1)?.end || 0)));
+  const H = Math.ceil(maxEnd / DAY_H) * DAY_H;
+  const pct = h => (h / H * 100) + '%';
+  let days = '';
+  for (let d = 0; d * DAY_H < H; d++) days += `<div class="g-day" style="left:${pct(d*DAY_H)}">${dayLabel(d)}</div>`;
+  const rows = LINES.map(l => {
+    const bars = sims[l].map(o => {
+      const co = o.co ? `<div class="g-co" style="left:${pct(o.coStart)};width:${pct(o.co)}" title="換線 ${Math.round(o.co*60)} 分"></div>` : '';
+      const cls = `g-bar ${o.customer}${o.isNew ? ' new' : ''}${o.days ? ' late' : ''}`;
+      const tip = `${o.id}｜${o.customer} ${o.model} ${o.qty} 片｜交期 ${dayLabel(o.due)}${o.days ? '｜逾期 '+o.days+' 天，罰 '+money(o.pen) : ''}`;
+      return co + `<div class="${cls}" style="left:${pct(o.start)};width:${pct(o.end-o.start)}" title="${esc(tip)}">${o.isNew ? '★插單 ' : ''}${o.isNew ? '' : o.id+' '}${o.customer}${o.model}·${o.qty}</div>`;
+    }).join('');
+    const hl = opts.highlight === l ? ' style="box-shadow:0 0 0 2px #F59E0B"' : '';
+    return `<div class="g-row"${hl}><div class="g-lbl">${LINE_NAME[l]}</div>${bars}</div>`;
+  }).join('');
+  return `<div class="gantt"><div class="g-days">${days}</div>${rows}</div>
+  <div class="g-legend"><span><i style="background:#3B82F6"></i>客戶甲（無罰則）</span><span><i style="background:#EF4444"></i>客戶乙（罰 2%／天）</span><span><i style="background:#8B5CF6"></i>客戶丙（罰 1%／天）</span><span><i style="background:repeating-linear-gradient(-45deg,#94A3B8,#94A3B8 3px,#CBD5E1 3px,#CBD5E1 6px)"></i>換線</span>${opts.showNew ? '<span><i style="background:#F59E0B"></i>本次插單</span>' : ''}<span><i style="background:#fff;outline:2px solid #7F1D1D"></i>逾期</span></div>`;
+}
+
+/* =====================================================================
+   總覽
+===================================================================== */
+function renderOverview(){
+  const acked = state.messages.filter(m => m.ackAt);
+  const avg = acked.length ? Math.round(acked.reduce((a,m) => a + diffMin(m.createdAt, m.ackAt), 0) / acked.length) : 0;
+  const wait = state.messages.filter(m => !m.ackAt).length;
+  const sims = simAll(state.schedule);
+  const all = LINES.flatMap(l => sims[l]);
+  const pen = all.reduce((a,b) => a + b.pen, 0);
+  const lateN = all.filter(o => o.days).length;
+  const co = all.filter(o => o.co).length;
+  const out = state.fixtures.filter(f => f.borrower).length, over = state.fixtures.filter(isOver).length;
+  $('#kpis').innerHTML = `
+    <div class="kpi" style="--k:#2563EB"><div class="lbl">變更通知 → 課長確認（平均）</div><div class="val">${avg}<small> 分鐘</small></div><div class="cmp">九月基準 ${SEPT_BASE_MIN} 分鐘（資料3）→ <b>快 ${Math.max(0,Math.round((1-avg/SEPT_BASE_MIN)*100))}%</b></div></div>
+    <div class="kpi" style="--k:#D97706"><div class="lbl">待課長確認／待老闆決策</div><div class="val">${wait}<small> 則</small> / ${state.messages.filter(needsDecision).length}<small> 則</small></div><div class="cmp">每則都有時間戳記，不再「沒記錄」</div></div>
+    <div class="kpi" style="--k:${pen ? '#DC2626' : '#059669'}"><div class="lbl">目前排程預估違約金</div><div class="val">${fmt(pen)}<small> 元</small></div><div class="cmp">${lateN ? lateN + ' 張工單會逾期' : '所有工單可準時交貨'}｜排程內換線 ${co} 次</div></div>
+    <div class="kpi" style="--k:${over ? '#DC2626' : '#7C3AED'}"><div class="lbl">夾具借出中／逾期未還</div><div class="val">${out}<small> 件</small> / ${over}<small> 件</small></div><div class="cmp">${over ? '有夾具逾期，換線前請先確認' : '夾具狀態正常'}</div></div>`;
+  $('#ovGantt').innerHTML = ganttHTML(sims);
+  const td = todayRow();
+  $('#ovChart').innerHTML = dailyChart([...SEPT, td], true);
+  const tStop = Math.round((td.coH + td.matH + td.errH) * 10) / 10;
+  $('#ovTodaySub').textContent = `停機 ${tStop}h・估計稼動率 ${Math.round(td.oee*100)}%`;
+  $('#ovToday').innerHTML = `
+    <div style="font-size:12.5px;font-weight:800;color:var(--mute);margin-bottom:4px">📒 課長日報備註</div>
+    ${td.rep ? `<div class="msg-note" style="margin:0 0 4px">${esc(td.rep.note)}</div><div style="margin-bottom:4px">${noteTags(td.rep.note).map(t => `<span class="ntag" style="background:${t.c}">${t.k}</span>`).join('')}</div><div class="src">${esc(td.rep.by)}・${hm(td.rep.at)}</div>`
+      : `<div class="warn w-a" style="margin:0">今日課長日報尚未送出</div>`}
+    <div style="font-size:12.5px;font-weight:800;color:var(--mute);margin:12px 0 2px">🛑 SMT 機台停機紀錄</div>
+    ${td.stops.slice().reverse().slice(0,4).map(s => `<div class="stop-item"><span class="tag" style="background:${STOP_COLOR[s.type]};color:#fff">${s.type}</span><b>${LINE_NAME[s.line]}</b><span style="flex:1;color:var(--ink2);font-size:12.5px">${esc(s.reason)}</span><span class="h">${s.h}h</span></div>`).join('') || '<div class="empty">今日尚無停機</div>'}`;
+  const recent = [...state.messages].sort((a,b) => b.createdAt.localeCompare(a.createdAt)).slice(0,4);
+  $('#ovMsgs').innerHTML = recent.map(m => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #F1F5F9">
+      ${custTag(m.customer)}
+      <div style="flex:1"><b>${m.type}｜${m.model}${m.qty ? ' · ' + m.qty + ' 片' : ''}</b><div class="src">${esc(m.by)} · ${sinceText(m.createdAt)}</div></div>
+      ${m.ackAt ? `<span class="tag t-green">已確認</span>` : `<span class="tag t-amber">待確認</span>`}
+      ${needsDecision(m) ? `<span class="tag t-red">待決策</span>` : ''}
+    </div>`).join('') || '<div class="empty">尚無通知</div>';
+  const fxAlerts = state.fixtures.filter(f => f.borrower).sort((a,b) => isOver(b) - isOver(a));
+  $('#ovFx').innerHTML = fxAlerts.map(f => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #F1F5F9">
+      <span style="font-size:20px">${f.kind === '飛達' ? '🎞️' : f.kind === '測試治具' ? '🔌' : '🧰'}</span>
+      <div style="flex:1"><b>${esc(f.name)}</b><div class="src">${esc(f.borrower)} · ${esc(f.place)} · 借出 ${sinceText(f.borrowedAt)}</div></div>
+      ${isOver(f) ? `<span class="tag t-red">逾期 ${Math.round(diffMin(f.dueAt, new Date())/60*10)/10} 小時</span>` : `<span class="tag t-amber">借出中</span>`}
+    </div>`).join('') || '<div class="empty">全部夾具都在庫</div>';
+}
+
+/* =====================================================================
+   變更通知
+===================================================================== */
+function fillDueSelect(sel, val){ sel.innerHTML = [0,1,2,3,4,5].map(i => `<option value="${i}">${dayLabel(i)}</option>`).join(''); sel.value = val ?? 2; }
+function fillModelSelect(sel, val){ sel.innerHTML = MODELS.map(m => `<option>${m}</option>`).join(''); if (val) sel.value = val; }
+
+function affectedOrders(model){
+  return LINES.flatMap(l => state.schedule[l].filter(o => o.model === model).map(o => `${o.id}（${LINE_NAME[l]}，${o.customer} ${o.qty} 片）`));
+}
+
+function renderMessages(){
+  const canPost = ui.role === 'sales';
+  $('#postBtn').disabled = !canPost;
+  $('#postBtn').textContent = canPost ? '📤 送出，通知現場課長' : '請切換為「業務」身分才能登錄';
+  let list = [...state.messages].sort((a,b) => b.createdAt.localeCompare(a.createdAt));
+  const f = ui.msgFilter;
+  if (f === 'wait') list = list.filter(m => !m.ackAt);
+  else if (f === 'eval') list = list.filter(needsDecision);
+  else if (f !== 'all') list = list.filter(m => m.type === f);
+  $('#msgStat').textContent = `共 ${state.messages.length} 則｜待確認 ${state.messages.filter(m => !m.ackAt).length} 則`;
+  $('#msgList').innerHTML = list.map(m => {
+    const waitMin = diffMin(m.createdAt, new Date());
+    const status = m.ackAt
+      ? `<span class="status s-ok">✔ ${esc(m.ackBy)} 已確認（${diffMin(m.createdAt, m.ackAt)} 分鐘內）</span>`
+      : `<span class="status s-wait">⏳ 等待課長確認，已 ${waitMin} 分鐘</span>`;
+    const impact = m.type === '換零件'
+      ? `<div class="msg-impact">⚠️ 排程中使用 ${m.model} 的工單：${affectedOrders(m.model).join('、') || '無'}<br>→ 請倉庫停發舊料、現場暫停貼舊料，避免「已貼才知道要拆」</div>` : '';
+    const btns = [];
+    if (!m.ackAt) btns.push(`<button class="btn btn-g btn-sm" data-ack="${m.id}" ${ui.role === 'lead' ? '' : 'disabled title="請切換為課長身分"'}>✔ 確認收到</button>`);
+    if (needsDecision(m)) btns.push(`<button class="btn btn-p btn-sm" data-eval="${m.id}">⚖️ 評估違約風險</button>`);
+    return `<div class="msg ${m.type} ${m.ackAt ? '' : 'unack'}">
+      <div class="msg-top">${custTag(m.customer)}<span class="msg-title">${m.type}｜${m.model}${m.qty ? ' · ' + m.qty + ' 片' : ''}</span>
+        ${m.type === '追加' ? `<span class="tag t-blue">交期 ${dayLabel(m.due)}</span>` : `<span class="tag t-amber">${esc(m.part)}</span>`}
+        <span class="tag t-gray">原始管道：${esc(m.channel)}</span><span class="src" style="margin-left:auto">${m.id}</span></div>
+      <div class="msg-meta">${esc(m.by)} 登錄於 ${hm(m.createdAt)}（${sinceText(m.createdAt)}）</div>
+      ${m.note ? `<div class="msg-note">💬 ${esc(m.note)}</div>` : ''}
+      ${impact}
+      ${m.decision ? `<div class="decision">⚖️ ${esc(m.decision.text)}（${esc(m.decision.by)}，${hm(m.decision.at)}）</div>` : ''}
+      <div class="msg-foot">${status}<div style="display:flex;gap:6px">${btns.join('')}</div></div>
+    </div>`;
+  }).join('') || '<div class="empty">沒有符合條件的通知</div>';
+}
+
+function parseRaw(){
+  const s = $('#rawText').value;
+  if (!s.trim()){ toast('請先貼上客戶原文', '例如 LINE 訊息或電話筆記'); return; }
+  const got = [];
+  const c = s.match(/[甲乙丙]/); if (c){ $('#fCust').value = c[0]; got.push('客戶'); }
+  const m = s.toUpperCase().match(/[ABC][12]/); if (m){ $('#fModel').value = m[0]; got.push('機種'); }
+  const isSwap = /換|改|變更|替代|ECN|REV/i.test(s) && !/追加|加單|多要|加做/.test(s);
+  setType(isSwap ? '換零件' : '追加'); got.push('類型');
+  const q = s.match(/(\d[\d,]*)\s*(片|pcs|PCS|個)/); if (q){ $('#fQty').value = q[1].replace(/,/g,''); got.push('數量'); }
+  const d = s.match(/今天|明天|後天|大後天/); if (d){ $('#fDue').value = {今天:0,明天:1,後天:2,大後天:3}[d[0]]; got.push('交期'); }
+  if (/LINE|line|賴/.test(s)) $('#fChannel').value = 'LINE'; else if (/電話|打來|來電/.test(s)) $('#fChannel').value = '電話'; else if (/老闆|董/.test(s)) $('#fChannel').value = '口頭（老闆轉達）';
+  const p = s.match(/([A-Z]?\d*\s*[^\s，,。]*?(電容|電阻|IC|晶片|模組|連接器)[^，,。]*)/); if (isSwap && p) $('#fPart').value = p[1].trim();
+  $('#fNote').value = s.slice(0, 60);
+  toast('✨ 已自動帶入', got.join('、') + '，請確認後送出');
+}
+function setType(v){ ui.type = v; $$('#typeSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === v)); $('#qtyRow').style.display = v === '追加' ? 'flex' : 'none'; $('#partRow').style.display = v === '換零件' ? 'block' : 'none'; }
+
+function postMessage(){
+  if (ui.role !== 'sales') return;
+  const type = ui.type, qty = type === '追加' ? +$('#fQty').value : 0;
+  if (type === '追加' && !(qty > 0)){ toast('數量不正確', '請輸入追加片數'); return; }
+  if (type === '換零件' && !$('#fPart').value.trim()){ toast('請填換料內容', '例如：C55 電容 10µF → 22µF'); return; }
+  const n = state.messages.length + 3 + state.seq++;
+  const m = {id:'M-' + String(n).padStart(3,'0'), type, customer:$('#fCust').value, model:$('#fModel').value, qty, due:+$('#fDue').value, channel:$('#fChannel').value, part:$('#fPart').value.trim(), note:$('#fNote').value.trim(), by:ROLE_NAME.sales, createdAt:new Date().toISOString(), ackBy:null, ackAt:null, decision:null};
+  state.messages.push(m);
+  $('#rawText').value = ''; $('#fNote').value = ''; $('#fPart').value = '';
+  save({kind:'new', type:m.type, customer:m.customer, model:m.model, qty:m.qty, by:m.by});
+  toast('📤 已送出', `${m.id} 已即時推播給現場課長${type === '追加' ? '，並送老闆評估' : ''}`);
+}
+function ackMessage(id){
+  const m = state.messages.find(x => x.id === id); if (!m || m.ackAt) return;
+  m.ackAt = new Date().toISOString(); m.ackBy = ROLE_NAME.lead;
+  save({kind:'ack', id, who:m.ackBy});
+}
+
+/* =====================================================================
+   夾具管理
+===================================================================== */
+function renderFixtures(){
+  const F = state.fixtures, out = F.filter(f => f.borrower), over = F.filter(isOver);
+  $('#fxKpis').innerHTML = `
+    <div class="kpi" style="--k:#059669"><div class="lbl">在庫可用</div><div class="val">${F.length - out.length}<small> / ${F.length} 件</small></div></div>
+    <div class="kpi" style="--k:#D97706"><div class="lbl">借出中</div><div class="val">${out.length}<small> 件</small></div></div>
+    <div class="kpi" style="--k:#DC2626"><div class="lbl">逾期未還</div><div class="val">${over.length}<small> 件</small></div><div class="cmp">${over.map(f => esc(f.borrower)).join('、') || '—'}</div></div>
+    <div class="kpi" style="--k:#2563EB"><div class="lbl">今日借還次數</div><div class="val">${state.log.filter(x => new Date(x.at).toDateString() === new Date().toDateString()).length}<small> 次</small></div></div>`;
+  let list = F;
+  if (ui.fxFilter === 'in') list = F.filter(f => !f.borrower);
+  if (ui.fxFilter === 'out') list = F.filter(f => f.borrower);
+  if (ui.fxFilter === 'over') list = F.filter(isOver);
+  $('#fxGrid').innerHTML = list.map(f => {
+    const st = !f.borrower ? '<span class="tag t-green">在庫</span>' : isOver(f) ? '<span class="tag t-red">逾期未還</span>' : '<span class="tag t-amber">借出中</span>';
+    const who = f.borrower
+      ? `<div class="fx-who">👤 <b>${esc(f.borrower)}</b></div><div class="fx-who">📍 ${esc(f.place)}</div><div class="src">借出 ${hm(f.borrowedAt)}・預計歸還 ${hm(f.dueAt)}</div>`
+      : `<div class="fx-who">📍 ${esc(f.home)}</div><div class="src">可立即借用</div>`;
+    return `<div class="fx ${f.borrower ? (isOver(f) ? 'over' : 'out') : ''}">
+      <div style="display:flex;justify-content:space-between;align-items:center"><span class="fx-name">${esc(f.name)}</span>${st}</div>
+      <div class="fx-id">${f.id}｜${f.kind}｜適用 ${f.model}</div>${who}
+      <div class="fx-foot">${f.borrower ? `<button class="btn btn-o btn-sm" data-return="${f.id}">↩ 歸還</button>` : `<button class="btn btn-p btn-sm" data-borrow="${f.id}">借出</button>`}</div>
+    </div>`;
+  }).join('') || '<div class="empty">沒有符合條件的夾具</div>';
+  $('#fxLog').innerHTML = [...state.log].sort((a,b) => b.at.localeCompare(a.at)).slice(0,15).map(x => `
+    <tr><td>${hm(x.at)}</td><td>${x.act === '借出' ? '<span class="tag t-amber">借出</span>' : '<span class="tag t-green">歸還</span>'}</td><td>${x.fx}｜${esc(state.fixtures.find(f => f.id === x.fx)?.name || '')}</td><td>${esc(x.who)}</td><td>${esc(x.place)}</td></tr>`).join('');
+}
+function openBorrow(id){
+  const f = state.fixtures.find(x => x.id === id);
+  $('#modal').innerHTML = `<h4>借出：${esc(f.name)}</h4><p class="hint">${f.id}｜適用機種 ${f.model}</p>
+    <label class="f">借用人</label><select class="inp" id="mWho">${PEOPLE.map(p => `<option ${p === ROLE_NAME[ui.role] ? 'selected' : ''}>${p}</option>`).join('')}</select>
+    <label class="f">使用地點</label><select class="inp" id="mPlace">${['1線插件站','2線插件站','3線插件站','4線插件站','1線 SMT','2線 SMT','3線 SMT','4線 SMT','測試站'].map(p => `<option>${p}</option>`).join('')}</select>
+    <label class="f">預計使用多久</label><select class="inp" id="mHrs"><option value="2">2 小時</option><option value="4" selected>4 小時</option><option value="8">1 個班（8 小時）</option><option value="24">1 天</option></select>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px"><button class="btn btn-o" id="mCancel">取消</button><button class="btn btn-p" id="mOk">確認借出</button></div>`;
+  $('#mask').classList.add('on');
+  $('#mCancel').onclick = closeModal;
+  $('#mOk').onclick = () => {
+    f.borrower = $('#mWho').value; f.place = $('#mPlace').value; f.borrowedAt = new Date().toISOString(); f.dueAt = new Date(Date.now() + $('#mHrs').value * 3600000).toISOString();
+    state.log.push({at:f.borrowedAt, act:'借出', fx:f.id, who:f.borrower, place:f.place});
+    closeModal(); save({kind:'fx'}); toast('🧰 已借出', `${f.name} → ${f.borrower}`);
+  };
+}
+function returnFx(id){
+  const f = state.fixtures.find(x => x.id === id);
+  state.log.push({at:new Date().toISOString(), act:'歸還', fx:f.id, who:f.borrower, place:f.home});
+  const who = f.borrower; delete f.borrower; delete f.place; delete f.borrowedAt; delete f.dueAt;
+  save({kind:'fx'}); toast('↩ 已歸還', `${f.name}（${who}）`);
+}
+function closeModal(){ $('#mask').classList.remove('on'); }
+
+/* =====================================================================
+   違約預測
+===================================================================== */
+function renderPredForm(){
+  const pend = state.messages.filter(needsDecision);
+  const cur = $('#pFrom').value;
+  $('#pFrom').innerHTML = `<option value="">（手動輸入情境）</option>` + pend.map(m => `<option value="${m.id}">${m.id}｜${m.customer} ${m.model} 追加 ${m.qty} 片（${sinceText(m.createdAt)}）</option>`).join('');
+  if (pend.some(m => m.id === cur)) $('#pFrom').value = cur;
+}
+function loadFromMsg(id){
+  const m = state.messages.find(x => x.id === id); ui.evalMsg = m ? m.id : null;
+  if (!m) return;
+  $('#pCust').value = m.customer; $('#pModel').value = m.model; $('#pQty').value = m.qty; $('#pDue').value = m.due; $('#pFrom').value = m.id;
+}
+function runPrediction(){
+  const req = {customer:$('#pCust').value, model:$('#pModel').value, qty:+$('#pQty').value, due:+$('#pDue').value};
+  if (!(req.qty > 0)){ toast('數量不正確', '請輸入插單片數'); return; }
+  ui.evalMsg = $('#pFrom').value || null;
+  ui.pred = evaluate(req); renderPrediction(ui.pred);
+}
+function reasonText(o){
+  if (o.prev && o.prev.model === o.me.model) return `緊接在同機種 ${o.prev.id}（${o.prev.model}）之後，合併生產免額外換線`;
+  return o.coAdd > 0 ? `需多換線 ${o.coAdd} 次（約 ${Math.round(o.coAdd*CO_H*60)} 分鐘）` : '不增加換線次數';
+}
+function renderPrediction(r){
+  const {req, best, legacy, perLine, ot} = r;
+  let cls, ico, title, desc, choice;
+  if (!best.meets){
+    cls = 'red'; ico = '⛔'; title = `4 條線都無法在 ${dayLabel(req.due)} 前完成 ${req.qty} 片`;
+    desc = `最快 ${dayLabel(best.finishDay)} 完成。建議與客戶${req.customer}協調分批交貨，或週六加班（約 ${money(ot)}）。`; choice = 'ot';
+  } else if (best.pen === 0){
+    cls = 'green'; ico = '✅'; title = `建議排入 ${LINE_NAME[best.line]} 第 ${best.pos + 1} 順位：不會造成任何違約`;
+    desc = `${reasonText(best)}；${dayLabel(best.finishDay)} 完成，趕得上客戶要的 ${dayLabel(req.due)}。`; choice = 'best';
+  } else if (ot < best.pen){
+    cls = 'amber'; ico = '⚠️'; title = `建議週六加班生產，不要打亂平日排程`;
+    desc = `最好的插單排法仍會造成違約金 ${money(best.pen)}，加班成本約 ${money(ot)}，比較划算。`; choice = 'ot';
+  } else {
+    cls = 'amber'; ico = '⚠️'; title = `可排入 ${LINE_NAME[best.line]} 第 ${best.pos + 1} 順位，預估違約金 ${money(best.pen)}`;
+    desc = `這已是 4 條線中最低的違約金（加班約 ${money(ot)} 更貴）。受影響：${best.late.map(o => o.id + '（' + o.customer + '）').join('、')}。`; choice = 'best';
+  }
+  const save$ = legacy ? legacy.pen - best.pen : 0;
+  const lateList = o => o.late.length ? o.late.map(x => `${x.id}（${x.customer}，晚 ${x.days} 天，罰 ${money(x.pen)}）`).join('<br>') : '<span class="src">無</span>';
+  const matWarn = r.material.length
+    ? r.material.map(w => `<div class="warn w-r">📦 共用料 <b>${w.part}</b> 庫存 ${fmt(w.stock)} 片不夠：${w.o.isNew ? '本次插單' : w.o.id + '（' + LINE_NAME[w.o.line] + '，客戶' + w.o.customer + '）'}可能缺 ${fmt(w.short)} 片${w.o.isNew ? '，請採購先追料或分批生產' : '，插單會搶走這張工單的料'}</div>`).join('')
+    : `<div class="warn w-g">📦 共用料檢查通過：${Object.entries(SHARED).filter(([,v]) => v.models.includes(req.model)).map(([k]) => k).join('、') || '此機種無共用料'}庫存足夠</div>`;
+  const avail = r.fxModel.filter(f => !f.borrower);
+  const fxWarn = !r.fxModel.length ? '' : avail.length
+    ? `<div class="warn w-g">🧰 ${req.model} 插件夾具可用 ${avail.length} 件（${avail.map(f => f.id).join('、')}）</div>`
+    : `<div class="warn w-r">🧰 ${req.model} 插件夾具全部借出：${r.fxModel.map(f => `${f.borrower}（${f.place}${isOver(f) ? '，已逾期' : ''}）`).join('、')}。插單前請先協調歸還</div>`;
+
+  $('#predOut').innerHTML = `
+    <div class="reco ${cls}"><div class="ico">${ico}</div><div><h4>${title}</h4><p>${desc}</p></div></div>
+    <div class="grid g3 mt">
+      <div class="cmp-card ${choice === 'best' ? 'win' : ''}"><div class="h">🤖 系統建議排法</div><div class="m">${money(best.pen)}</div><div class="d">${LINE_NAME[best.line]} 第 ${best.pos + 1} 順位｜新增換線 ${best.coAdd} 次｜${best.meets ? '趕得上交期' : '趕不上交期'}</div></div>
+      <div class="cmp-card"><div class="h">🔁 現行做法「${req.customer}的先做」</div><div class="m" style="color:${legacy && legacy.pen ? 'var(--red)' : 'inherit'}">${legacy ? money(legacy.pen) : '—'}</div><div class="d">${legacy ? `直接插到最快空出的 ${LINE_NAME[legacy.line]} 最前面｜新增換線 ${legacy.coAdd} 次` : ''}${save$ > 0 ? `<br><b style="color:var(--green)">系統建議可省 ${money(save$)}</b>` : ''}</div></div>
+      <div class="cmp-card ${choice === 'ot' ? 'win' : ''}"><div class="h">🌙 週六加班生產</div><div class="m">${money(ot)}</div><div class="d">${req.qty} 片 × 31 元｜不影響平日排程，但加班會增加</div></div>
+    </div>
+    <div class="card mt">
+      <h3>各產線最佳插入位置比較 <span class="sub">已試算 ${LINES.reduce((a,l) => a + state.schedule[l].length, 0)} 種插入位置</span></h3>
+      <table class="t"><thead><tr><th>產線</th><th>插入位置</th><th>完成日</th><th>新增換線</th><th>會延誤的工單</th><th>預估違約金</th><th>客戶交期</th></tr></thead><tbody>
+      ${perLine.map(o => `<tr class="${o === best ? 'best' : ''}"><td><b>${LINE_NAME[o.line]}</b>${o === best ? ' <span class="tag t-green">建議</span>' : ''}</td><td>第 ${o.pos + 1} 順位${o.prev ? `<div class="src">接在 ${o.prev.id} ${o.prev.model} 後</div>` : ''}</td><td>${dayLabel(o.finishDay)}</td><td>${o.coAdd > 0 ? '+' + o.coAdd : o.coAdd}</td><td>${lateList(o)}</td><td><b style="color:${o.pen ? 'var(--red)' : 'var(--green)'}">${money(o.pen)}</b></td><td>${o.meets ? '<span class="tag t-green">趕得上</span>' : '<span class="tag t-red">趕不上</span>'}</td></tr>`).join('')}
+      </tbody></table>
+    </div>
+    <div class="grid g2 mt">
+      <div class="card"><h3>共用料與夾具檢查</h3>${matWarn}${fxWarn}</div>
+      <div class="card"><h3>老闆決策 <span class="sub">${ui.evalMsg ? '對應通知 ' + ui.evalMsg : '手動情境'}</span></h3>
+        <p class="hint" style="margin-bottom:10px">決策後會寫回變更通知，課長與業務即時收到；選「排入」會直接更新排程。</p>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button class="btn btn-g" data-decide="best" ${ui.role === 'boss' ? '' : 'disabled'}>✅ 採用系統建議：排入 ${LINE_NAME[best.line]} 第 ${best.pos + 1} 順位（${money(best.pen)}）</button>
+          <button class="btn btn-a" data-decide="ot" ${ui.role === 'boss' ? '' : 'disabled'}>🌙 改排週六加班（約 ${money(ot)}）</button>
+          <button class="btn btn-o" data-decide="nego" ${ui.role === 'boss' ? '' : 'disabled'}>🤝 先不插單，請業務與客戶協調交期／分批</button>
+        </div>
+        ${ui.role === 'boss' ? '' : '<p class="hint" style="margin-top:8px">請切換為「老闆」身分才能決策</p>'}
+      </div>
+    </div>
+    <div class="card mt"><h3>採用系統建議後的排程 <span class="sub">黃色斜紋 = 本次插單；滑鼠移到色塊可看細節</span></h3>${ganttHTML(r.simsBest, {showNew:true, highlight:best.line})}</div>`;
+}
+function decide(kind){
+  if (ui.role !== 'boss' || !ui.pred) return;
+  const {req, best, ot} = ui.pred;
+  let text;
+  if (kind === 'best'){
+    const id = 'W' + (1200 + state.seq++);
+    state.schedule[best.line].splice(best.pos, 0, {id, customer:req.customer, model:req.model, qty:req.qty, due:req.due});
+    text = `核准：${req.customer} ${req.model} ${req.qty} 片排入 ${LINE_NAME[best.line]} 第 ${best.pos + 1} 順位（工單 ${id}），預估違約金 ${money(best.pen)}`;
+  } else if (kind === 'ot') text = `核准：${req.customer} ${req.model} ${req.qty} 片改排週六加班，預估成本 ${money(ot)}，平日排程不變`;
+  else text = `暫緩：請業務與客戶${req.customer}協調 ${req.model} ${req.qty} 片的交期或分批出貨`;
+  const m = state.messages.find(x => x.id === ui.evalMsg);
+  if (m) m.decision = {text, by:ROLE_NAME.boss, at:new Date().toISOString()};
+  ui.pred = null; ui.evalMsg = null;
+  $('#predOut').innerHTML = `<div class="card"><div class="warn w-g" style="margin:0">⚖️ ${esc(text)}</div><p class="hint" style="margin-top:10px">已通知課長與業務。可到「總覽」查看更新後的排程。</p></div>`;
+  save({kind:'decision', text});
+}
+
+/* =====================================================================
+   每日紀錄：課長日報 + SMT 機台停機
+===================================================================== */
+function todayRow(){
+  const t = todayKey(), d = new Date();
+  const stops = state.stops.filter(s => s.date === t);
+  const rep = [...state.reports].filter(r => r.date === t).pop();
+  const sum = k => stops.filter(s => s.type === k).reduce((a,b) => a + b.h, 0);
+  const coH = sum('換線'), matH = sum('等料'), errH = sum('拋料與故障');
+  const elapsed = Math.min(10, Math.max(1, (d.getHours() + d.getMinutes()/60) - 8));
+  const on = Math.round(4 * elapsed * 10) / 10; // 4 線 × 今日 08:00 起已開機時數【我猜的】
+  const run = Math.max(0, on - coH - matH - errH);
+  const ev = state.messages.filter(m => new Date(m.createdAt).toDateString() === d.toDateString());
+  return {label:`今日 ${d.getMonth()+1}/${d.getDate()}`, w:WEEK[d.getDay()], ship:rep?.ship ?? null, ot:rep?.ot ?? null, co:rep?.co ?? stops.filter(s => s.type === '換線').length, rt:rep?.rt ?? null,
+    note:rep?.note ?? '', rep, ev:null, evToday:ev, on, run, oee: run/on, coH, matH, errH, src:'today', stops};
+}
+
+function dailyChart(rows, compact){
+  const W = 900, H = compact ? 220 : 270, L = 40, R = 44, T = 14, B = 34;
+  const iw = W - L - R, ih = H - T - B;
+  const maxS = Math.max(20, ...rows.map(r => r.coH + r.matH + r.errH));
+  const yS = v => T + ih - v / maxS * ih;
+  const yO = v => T + ih - (v - 0.5) / 0.4 * ih; // 50%–90%
+  const bw = iw / rows.length;
+  let g = '';
+  [0, maxS/4, maxS/2, maxS*3/4, maxS].forEach(v => { g += `<line x1="${L}" x2="${W-R}" y1="${yS(v)}" y2="${yS(v)}" stroke="#E2E8F0"/><text x="${L-6}" y="${yS(v)+4}" font-size="10" text-anchor="end" fill="#64748B">${Math.round(v)}h</text>`; });
+  [.5,.6,.7,.8,.9].forEach(v => { g += `<text x="${W-R+6}" y="${yO(v)+4}" font-size="10" fill="#2563EB">${Math.round(v*100)}%</text>`; });
+  g += `<line x1="${L}" x2="${W-R}" y1="${yO(.88)}" y2="${yO(.88)}" stroke="#10B981" stroke-dasharray="4 3"/><text x="${L+4}" y="${yO(.88)-4}" font-size="10" fill="#059669">四月稼動率 88%</text>`;
+  const pts = [];
+  rows.forEach((r, i) => {
+    const x = L + i * bw + bw * 0.18, w = bw * 0.64;
+    let y = T + ih;
+    [['coH','換線'],['matH','等料'],['errH','拋料與故障']].forEach(([k, nm]) => {
+      const h = r[k] / maxS * ih; y -= h;
+      g += `<rect x="${x}" y="${y}" width="${w}" height="${Math.max(0,h)}" fill="${STOP_COLOR[nm]}" opacity="${r.src === 'today' ? 1 : .85}"><title>${r.label} ${nm} ${r[k]} 小時</title></rect>`;
+    });
+    if (r.src === 'today') g += `<rect x="${L + i*bw + 1}" y="${T}" width="${bw - 2}" height="${ih}" fill="none" stroke="#2563EB" stroke-dasharray="3 2"/>`;
+    const cx = L + i * bw + bw / 2;
+    pts.push(`${cx},${yO(r.oee)}`);
+    const showLbl = !compact || i % 2 === 0 || r.src === 'today';
+    if (showLbl) g += `<text x="${cx}" y="${H - B + 14}" font-size="${compact ? 9 : 10}" text-anchor="middle" fill="${r.src === 'today' ? '#2563EB' : '#64748B'}" font-weight="${r.src === 'today' ? 700 : 400}">${r.src === 'today' ? '今日' : r.label.replace('9/','')}</text>`;
+    if (r.ev && !compact) g += `<text x="${cx}" y="${H - B + 27}" font-size="10" text-anchor="middle" fill="${r.ev[0].startsWith('追加') ? '#2563EB' : '#D97706'}">${r.ev[0].startsWith('追加') ? '▲' : '◆'}</text>`;
+  });
+  g += `<polyline points="${pts.join(' ')}" fill="none" stroke="#2563EB" stroke-width="2"/>`;
+  rows.forEach((r, i) => { const cx = L + i*bw + bw/2; const low = r.oee < .75; g += `<circle cx="${cx}" cy="${yO(r.oee)}" r="${low ? 4 : 3}" fill="${low ? '#DC2626' : '#2563EB'}"><title>${r.label} 稼動率 ${Math.round(r.oee*100)}%${r.note ? '｜' + esc(r.note) : ''}</title></circle>`; });
+  if (!compact) g += `<text x="${L}" y="${H-2}" font-size="10" fill="#64748B">${compact ? '' : '9 月日期（▲ 追加單、◆ 換零件）'}</text>`;
+  const legend = `<div class="g-legend"><span><i style="background:${STOP_COLOR['換線']}"></i>換線停機</span><span><i style="background:${STOP_COLOR['等料']}"></i>等料停機</span><span><i style="background:${STOP_COLOR['拋料與故障']}"></i>拋料與故障</span><span><i style="background:#2563EB;height:3px"></i>稼動率（紅點 &lt; 75%）</span></div>`;
+  return `<svg viewBox="0 0 ${W} ${H}">${g}</svg>${legend}`;
+}
+
+function renderDaily(){
+  const today = todayRow();
+  const rows = [...SEPT, today];
+  // KPI
+  const blank = SEPT.filter(r => !r.note.trim()).length, late = SEPT.filter(r => /補寫/.test(r.note)).length;
+  const tStop = today.coH + today.matH + today.errH;
+  $('#dKpis').innerHTML = `
+    <div class="kpi" style="--k:#DC2626"><div class="lbl">九月 SMT 稼動率</div><div class="val">76<small> %</small></div><div class="cmp">開機 1,003h、正常運轉 760h｜四月 88%（資料1、3）</div></div>
+    <div class="kpi" style="--k:#F43F5E"><div class="lbl">九月 SMT 停機合計</div><div class="val">243<small> 小時</small></div><div class="cmp">換線 133h（55%）・等料 62h・拋料 48h</div></div>
+    <div class="kpi" style="--k:#94A3B8"><div class="lbl">九月課長備註未填／補寫</div><div class="val">${blank}<small> 天</small> / ${late}<small> 天</small></div><div class="cmp">異常只留在文字裡，沒有人整合追蹤</div></div>
+    <div class="kpi" style="--k:#2563EB"><div class="lbl">今日 SMT 停機（估計稼動率）</div><div class="val">${Math.round(tStop*10)/10}<small> 小時</small></div><div class="cmp">估計稼動率 <b style="color:${today.oee < .8 ? 'var(--red)' : 'var(--green)'}">${Math.round(today.oee*100)}%</b>（4 線×08:00 起已開機 ${today.on}h 估算【我猜的】）</div></div>`;
+  $('#dChart').innerHTML = dailyChart(rows, false);
+  // 備註分類
+  const cnt = {};
+  rows.forEach(r => noteTags(r.note).forEach(t => { cnt[t.k] = cnt[t.k] || {n:0, c:t.c}; cnt[t.k].n++; }));
+  const tagArr = Object.entries(cnt).sort((a,b) => b[1].n - a[1].n);
+  const maxN = Math.max(...tagArr.map(x => x[1].n));
+  $('#tagBars').innerHTML = tagArr.map(([k,v]) => `<div class="tagbar"><span class="nm">${k}</span><div class="tr"><div class="fl" style="width:${v.n/maxN*100}%;background:${v.c}"></div></div><span class="ct">${v.n} 天</span></div>`).join('');
+  const st = [['換線', SEPT_TOTAL.coH], ['等料', SEPT_TOTAL.matH], ['拋料與故障', SEPT_TOTAL.errH]];
+  $('#stopBars').innerHTML = st.map(([k,v]) => `<div class="tagbar"><span class="nm">${k}</span><div class="tr"><div class="fl" style="width:${v/133*100}%;background:${STOP_COLOR[k]}"></div></div><span class="ct">${v}h</span></div>`).join('')
+    + `<div class="warn w-a" style="margin-top:10px">四月 → 九月：換線停機 48h → 133h、換線次數 64 → 148 次；新增停機 135h，比多開機的 122h 還多</div>`;
+  // 今日日報與停機
+  $('#repSub').textContent = today.rep ? `已於 ${hm(today.rep.at)} 由 ${today.rep.by} 送出，可再更新` : '今日尚未送出';
+  $('#repBtn').disabled = ui.role !== 'lead';
+  $('#repBtn').textContent = ui.role === 'lead' ? (today.rep ? '📒 更新今日日報' : '📒 送出今日日報') : '請切換為「課長」身分才能送出日報';
+  $('#stopSub').textContent = `今日 ${today.stops.length} 筆・${Math.round(tStop*10)/10} 小時`;
+  $('#stopList').innerHTML = today.stops.slice().reverse().map(s => `<div class="stop-item"><span class="tag" style="background:${STOP_COLOR[s.type]};color:#fff">${s.type}</span><b>${LINE_NAME[s.line]}</b><span style="flex:1;color:var(--ink2)">${esc(s.reason)}<div class="src">${hm(s.at)}・${esc(s.by)}</div></span><span class="h">${s.h}h</span></div>`).join('') || '<div class="empty">今日尚無停機紀錄</div>';
+  // 篩選
+  const filt = ['全部', ...NOTE_TAGS.map(t => t.k), '未填寫'];
+  if (!ui.dFilter) ui.dFilter = '全部';
+  $('#dFilter').innerHTML = filt.map(f => `<button class="chip ${ui.dFilter === f ? 'on' : ''}" data-df="${f}">${f}</button>`).join('');
+  // 總表
+  const custom = state.reports.filter(r => r.date !== todayKey());
+  let list = [today, ...SEPT.slice().reverse()];
+  if (ui.dFilter !== '全部') list = list.filter(r => noteTags(r.note).some(t => t.k === ui.dFilter));
+  const num = v => v == null ? '<span class="src">—</span>' : fmt(v);
+  $('#dTable').innerHTML = list.map(r => {
+    const tags = noteTags(r.note).map(t => `<span class="ntag" style="background:${t.c}">${t.k}</span>`).join('');
+    const ev = r.src === 'today'
+      ? (r.evToday.map(m => `${custTag(m.customer)} ${m.type} ${m.model}${m.qty ? ' ' + m.qty + ' 片' : ''}`).join('<br>') || '<span class="src">—</span>')
+      : r.ev ? `${custTag(r.ev[1])} ${r.ev[0]}<div class="src">${r.ev[2]}｜通知 ${r.ev[3]} → 現場 ${r.ev[4]}${r.ev[5] ? '｜' + r.ev[5] : ''}</div>` : '<span class="src">—</span>';
+    return `<tr class="${r.src === 'today' ? 'today' : r.oee < .75 ? 'low' : ''}"><td><b>${r.label}</b>(${r.w})${r.src === 'today' ? '<div class="src">日報＋機台即時</div>' : ''}</td><td>${num(r.ship)}</td><td>${num(r.ot)}</td><td>${num(r.co)}</td><td>${num(r.rt)}</td>
+      <td class="oee" style="color:${r.oee < .75 ? 'var(--red)' : 'var(--ink)'}">${Math.round(r.oee*100)}%</td><td>${r.coH} / ${r.matH} / ${r.errH}</td>
+      <td class="note-cell">${r.note ? esc(r.note) : '<span class="src">（課長當天沒有寫）</span>'}</td><td>${tags}</td><td>${ev}</td></tr>`;
+  }).join('') || '<tr><td colspan="10" class="empty">沒有符合的紀錄</td></tr>';
+}
+
+function submitReport(){
+  if (ui.role !== 'lead') return;
+  const v = id => { const x = $(id).value; return x === '' ? null : +x; };
+  const note = $('#rNote').value.trim();
+  if (!note){ toast('請寫備註', '可以點常用語快速帶入'); return; }
+  state.reports.push({date:todayKey(), ship:v('#rShip'), ot:v('#rOt'), co:v('#rCo'), rt:v('#rRetest'), note, by:ROLE_NAME.lead, at:new Date().toISOString()});
+  save({kind:'report', text:`${ROLE_NAME.lead}：${note.slice(0,40)}`});
+  toast('📒 日報已送出', '老闆與生管可在總覽即時看到');
+}
+function addStop(){
+  const h = +$('#sH').value, reason = $('#sReason').value.trim();
+  if (!(h > 0)){ toast('時數不正確', '請輸入停機時數'); return; }
+  const s = {date:todayKey(), line:$('#sLine').value, type:$('#sType').value, h, reason: reason || '（未填原因）', at:new Date().toISOString(), by: ui.role === 'lead' ? ROLE_NAME.lead + ' 補登' : '機台匯入'};
+  state.stops.push(s); $('#sReason').value = '';
+  save({kind:'stop', text:`${LINE_NAME[s.line]} ${s.type} ${s.h} 小時：${s.reason}`});
+}
+
+/* =====================================================================
+   事件綁定
+===================================================================== */
+function go(tab){ ui.tab = tab; $$('#nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab)); $$('section').forEach(s => s.classList.toggle('on', s.id === tab)); window.scrollTo(0,0); }
+$('#nav').onclick = e => { const b = e.target.closest('button'); if (b) go(b.dataset.tab); };
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-goto],[data-ack],[data-eval],[data-borrow],[data-return],[data-decide]');
+  if (!t) return;
+  if (t.dataset.goto) go(t.dataset.goto);
+  if (t.dataset.ack) ackMessage(t.dataset.ack);
+  if (t.dataset.eval){ go('predict'); renderPredForm(); loadFromMsg(t.dataset.eval); runPrediction(); }
+  if (t.dataset.borrow) openBorrow(t.dataset.borrow);
+  if (t.dataset.return) returnFx(t.dataset.return);
+  if (t.dataset.decide) decide(t.dataset.decide);
+});
+$('#msgFilter').onclick = e => { const b = e.target.closest('.chip'); if (!b) return; ui.msgFilter = b.dataset.f; $$('#msgFilter .chip').forEach(c => c.classList.toggle('on', c === b)); renderMessages(); };
+$('#fxFilter').onclick = e => { const b = e.target.closest('.chip'); if (!b) return; ui.fxFilter = b.dataset.f; $$('#fxFilter .chip').forEach(c => c.classList.toggle('on', c === b)); renderFixtures(); };
+$('#typeSeg').onclick = e => { const b = e.target.closest('button'); if (b) setType(b.dataset.v); };
+$('#parseBtn').onclick = parseRaw;
+$('#postBtn').onclick = postMessage;
+$('#runPred').onclick = runPrediction;
+$('#repBtn').onclick = submitReport;
+$('#stopBtn').onclick = addStop;
+$('#noteChips').onclick = e => { const b = e.target.closest('button'); if (!b) return; const n = $('#rNote'); n.value = n.value.trim() ? n.value.trim() + '，' + b.textContent : b.textContent; n.focus(); };
+$('#dFilter').onclick = e => { const b = e.target.closest('.chip'); if (!b) return; ui.dFilter = b.dataset.df; renderDaily(); };
+$('#pFrom').onchange = e => { if (e.target.value) loadFromMsg(e.target.value); else ui.evalMsg = null; };
+$('#mask').onclick = e => { if (e.target.id === 'mask') closeModal(); };
+$('#role').onchange = e => {
+  ui.role = e.target.value;
+  go({sales:'messages', lead:'messages', boss:'predict'}[ui.role]);
+  if (ui.role === 'boss' && !ui.pred){ const p = state.messages.find(needsDecision); if (p){ renderPredForm(); loadFromMsg(p.id); runPrediction(); } }
+  renderAll();
+};
+$('#resetBtn').onclick = () => { if (confirm('確定要清除目前資料，重新載入示範資料？')){ state = seed(); ui.pred = null; save({kind:'reset'}); toast('已重置', '示範資料已重新載入'); } };
+setInterval(() => { const d = new Date(); $('#clock').textContent = `${d.getMonth()+1}/${d.getDate()}(${WEEK[d.getDay()]}) ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`; }, 1000);
+setInterval(() => { if (ui.tab !== 'predict') { renderBadges(); renderOverview(); renderMessages(); } }, 30000);
+
+// 初始化
+fillModelSelect($('#fModel'), 'A1'); fillModelSelect($('#pModel'), 'A1');
+fillDueSelect($('#fDue'), 2); fillDueSelect($('#pDue'), 2);
+const qs = new URLSearchParams(location.search).get('role');
+if (qs && ROLE_NAME[qs]){ $('#role').value = qs; }
+ui.role = $('#role').value;
+renderAll();
+if (qs && ROLE_NAME[qs]) $('#role').dispatchEvent(new Event('change'));
+</script>
+</body>
+</html>
